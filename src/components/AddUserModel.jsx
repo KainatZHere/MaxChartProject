@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import {
@@ -24,7 +24,6 @@ const AddUserModel = ({
   getAPIUserData,
   addUserModelOpen,
   onClose,
-  designationList,
   departmentList,
   rolesList,
   token,
@@ -42,6 +41,7 @@ const AddUserModel = ({
   });
   const outerTheme = useTheme();
   const { setSnackbarOpen, setAlertMessage } = useContext(UserContext);
+  const [designationList, setDesignationList] = useState([]);
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -92,32 +92,23 @@ const AddUserModel = ({
     },
   };
 
-  const selectTextfieldStyle = {
-    width: 250,
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        border: "1px solid #085f99", // Removing default border
-      },
-      "&:hover fieldset": {
-        borderColor: "#085f99", // Change this to your hover color
-      },
-      // Border color on focus
-      "&.Mui-focused fieldset": {
-        borderColor: "#085f99", // Change this to your focus color
-      },
-    },
-    "& .MuiFormHelperText-root": {
-      margin: 0,
-      padding: 0,
-      color: "#FF0000 ", // Change the color of helper text
-      fontSize: "11px", // Change the font size
-      fontWeight: 400,
-    },
-  };
-
   const resetForm = () => {
     onClose();
     setUserFormData({});
+  };
+  const getDesignationListData = async (deptId) => {
+    const resp = await fetch(
+      `http://tfs-dgk:8784/api/User/GetDesignationList?DepertmentId=${deptId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await resp.json();
+    setDesignationList(data?.result);
   };
 
   const addUserAPIData = async () => {
@@ -148,7 +139,7 @@ const AddUserModel = ({
       setSnackbarOpen(true);
       setAlertMessage("User Added Successfully");
     }
-    getAPIUserData();
+    getAPIUserData("", "", 0);
     resetForm();
   };
 
@@ -159,7 +150,8 @@ const AddUserModel = ({
       userFormData?.firstName === "" ||
       userFormData.lastName === "" ||
       userFormData?.designationId === "" ||
-      userFormData?.departmentId === ""
+      userFormData?.departmentId === "" ||
+      userFormData?.roles == ""
     ) {
       setValidationError(true);
     } else {
@@ -167,6 +159,13 @@ const AddUserModel = ({
       addUserAPIData();
     }
   };
+
+  useEffect(() => {
+    if (userFormData?.departmentId) {
+      getDesignationListData(userFormData?.departmentId);
+    }
+  }, [userFormData?.departmentId]);
+
   return (
     <>
       <Modal open={addUserModelOpen}>
@@ -224,7 +223,7 @@ const AddUserModel = ({
                   sx={textfieldStyle}
                   size="small"
                   helperText={
-                    validationError && userFormData?.firstName === ""
+                    userFormData?.firstName === ""
                       ? "FirstName is required!"
                       : ""
                   }
@@ -246,7 +245,7 @@ const AddUserModel = ({
                   sx={textfieldStyle}
                   size="small"
                   helperText={
-                    validationError && userFormData?.lastName === ""
+                    userFormData?.lastName === ""
                       ? "LastName is required!"
                       : // : validationError && userFormData?.lastName?.length < 6
                         // ? "Lastname must be at least 6 characters long"
@@ -283,10 +282,9 @@ const AddUserModel = ({
                   sx={textfieldStyle}
                   size="small"
                   helperText={
-                    validationError && userFormData.email === ""
+                    userFormData.email === ""
                       ? "Email is required!"
-                      : validationError &&
-                        !/\S+@\S+\.\S+/.test(userFormData?.email)
+                      : !/\S+@\S+\.\S+/.test(userFormData?.email)
                       ? "Please enter a valid email."
                       : ""
                   }
@@ -345,9 +343,9 @@ const AddUserModel = ({
                       fontWeight: 500,
                     }}
                   >
-                    {validationError && userFormData?.password === ""
+                    {userFormData?.password === ""
                       ? "Strong password is required"
-                      : validationError && userFormData?.password?.length < 6
+                      : userFormData?.password?.length < 6
                       ? "Password must be 6 characters long"
                       : ""}
                   </FormHelperText>
@@ -377,18 +375,42 @@ const AddUserModel = ({
                   value={userFormData?.departmentId || ""}
                   select
                   size="small"
-                  sx={selectTextfieldStyle}
+                  sx={{
+                    width: 250,
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        border: "1px solid #085f99", // Removing default border
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#085f99", // Change this to your hover color
+                      },
+                      // Border color on focus
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#085f99", // Change this to your focus color
+                      },
+                    },
+                    "& .MuiFormHelperText-root": {
+                      margin: 0,
+                      padding: 0,
+                      color:
+                        validationError && userFormData?.departmentId === ""
+                          ? "#FF0000"
+                          : "#085f99", // Change the color of helper text
+                      fontSize: "11px", // Change the font size
+                      fontWeight: 400,
+                    },
+                  }}
                   helperText={
-                    validationError && userFormData?.departmentId === ""
-                      ? "Select Department"
-                      : ""
+                    userFormData?.departmentId === "" ? "Select Department" : ""
                   }
                 >
-                  {departmentList.map((item, index) => (
-                    <MenuItem key={index} value={item?.departmentId}>
-                      {item?.departmentName}
-                    </MenuItem>
-                  ))}
+                  {departmentList.map((item, index) => {
+                    return (
+                      <MenuItem key={index} value={item?.departmentId}>
+                        {item?.departmentName}
+                      </MenuItem>
+                    );
+                  })}
                 </TextField>
               </Box>
 
@@ -399,7 +421,7 @@ const AddUserModel = ({
                 <TextField
                   error={validationError && userFormData?.designationId === ""}
                   helperText={
-                    validationError && userFormData?.designationId === ""
+                    userFormData?.designationId === ""
                       ? "Select Designation"
                       : ""
                   }
@@ -412,7 +434,31 @@ const AddUserModel = ({
                   value={userFormData?.designationId || ""}
                   select
                   size="small"
-                  sx={selectTextfieldStyle}
+                  sx={{
+                    width: 250,
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        border: "1px solid #085f99", // Removing default border
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#085f99", // Change this to your hover color
+                      },
+                      // Border color on focus
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#085f99", // Change this to your focus color
+                      },
+                    },
+                    "& .MuiFormHelperText-root": {
+                      margin: 0,
+                      padding: 0,
+                      color:
+                        validationError && userFormData?.departmentId === ""
+                          ? "#FF0000"
+                          : "#085f99",
+                      fontSize: "11px", // Change the font size
+                      fontWeight: 400,
+                    },
+                  }}
                 >
                   {designationList.map((item, index) => (
                     <MenuItem key={index} value={item?.designationId}>
@@ -445,12 +491,30 @@ const AddUserModel = ({
                   }}
                   options={rolesList}
                   getOptionLabel={(options) => options?.roleName}
-                  sx={{ width: 250 }}
+                  sx={{
+                    width: 250,
+                  }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       size="small"
+                      error={validationError && userFormData?.roles == ""}
+                      helperText={
+                        userFormData?.roles == ""
+                          ? "Select at least one role"
+                          : ""
+                      }
                       sx={{
+                        "& .MuiFormHelperText-root": {
+                          margin: 0,
+                          padding: 0,
+                          color:
+                            validationError && userFormData?.roles == ""
+                              ? "#FF0000"
+                              : "#085f99",
+                          fontSize: "11px", // Change the font size
+                          fontWeight: 400,
+                        },
                         "& .MuiOutlinedInput-root": {
                           "& fieldset": {
                             border: "1px solid #085f99", // Removing default border
@@ -483,7 +547,28 @@ const AddUserModel = ({
                   value={userFormData?.status}
                   select
                   size="small"
-                  sx={selectTextfieldStyle}
+                  sx={{
+                    width: 250,
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        border: "1px solid #085f99", // Removing default border
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#085f99", // Change this to your hover color
+                      },
+                      // Border color on focus
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#085f99", // Change this to your focus color
+                      },
+                    },
+                    "& .MuiFormHelperText-root": {
+                      margin: 0,
+                      padding: 0,
+                      color: "#FF0000 ", // Change the color of helper text
+                      fontSize: "11px", // Change the font size
+                      fontWeight: 400,
+                    },
+                  }}
                 >
                   {[
                     { label: "Active", value: true },

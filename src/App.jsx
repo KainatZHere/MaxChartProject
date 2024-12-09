@@ -7,12 +7,17 @@ import AddUserModel from "./components/AddUserModel";
 import UpdateUserModel from "./components/UpdateUserModel";
 import Contact from "./components/ContactModel";
 import AlertProvider from "./Context/AlertProvider";
+import MyTest from "./components/Test";
+import RemoveModel from "./components/RemoveModel";
 
 function App() {
   return (
     <>
       <AlertProvider>
         <Home />
+        {/* <RemoveModel /> */}
+
+        {/* <MyTest /> */}
       </AlertProvider>
     </>
   );

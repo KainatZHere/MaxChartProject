@@ -61,7 +61,12 @@ const UpdateUserModel = ({
     "& .MuiFormHelperText-root": {
       margin: 0,
       padding: 0,
-      color: "#FF0000 ", // Change the color of helper text
+      color:
+        validationError && userFormData?.departmentId === ""
+          ? "#FF0000"
+          : validationError && userFormData?.designationId === ""
+          ? "#FF0000"
+          : "#085f99",
       fontSize: "11px", // Change the font size
       fontWeight: 400,
     },
@@ -123,7 +128,7 @@ const UpdateUserModel = ({
       setSnackbarOpen(true);
       setAlertMessage("User Updated Successfully");
     }
-    getAPIUserData();
+    getAPIUserData("", "", 0);
     resetForm();
   };
 
@@ -134,7 +139,8 @@ const UpdateUserModel = ({
       userFormData?.firstName === "" ||
       userFormData.lastName === "" ||
       userFormData?.designationId === "" ||
-      userFormData?.departmentId === ""
+      userFormData?.departmentId === "" ||
+      userFormData?.roles == ""
     ) {
       setValidationError(true);
     } else {
@@ -205,7 +211,7 @@ const UpdateUserModel = ({
                   sx={textfieldStyle}
                   size="small"
                   helperText={
-                    validationError && userFormData?.firstName === ""
+                    userFormData?.firstName === ""
                       ? "FirstName is required!"
                       : ""
                   }
@@ -227,9 +233,7 @@ const UpdateUserModel = ({
                   sx={textfieldStyle}
                   size="small"
                   helperText={
-                    validationError && userFormData?.lastName === ""
-                      ? "Lastname is required!"
-                      : ""
+                    userFormData?.lastName === "" ? "Lastname is required!" : ""
                   }
                 />
               </Box>
@@ -262,10 +266,9 @@ const UpdateUserModel = ({
                   sx={textfieldStyle}
                   size="small"
                   helperText={
-                    validationError && userFormData.email === ""
+                    userFormData.email === ""
                       ? "Email is required!"
-                      : validationError &&
-                        !/\S+@\S+\.\S+/.test(userFormData?.email)
+                      : !/\S+@\S+\.\S+/.test(userFormData?.email)
                       ? "Please enter a valid email."
                       : ""
                   }
@@ -278,7 +281,7 @@ const UpdateUserModel = ({
                 <TextField
                   error={validationError && userFormData?.designationId === ""}
                   helperText={
-                    validationError && userFormData?.designationId === ""
+                    userFormData?.designationId === ""
                       ? "Select Designation"
                       : ""
                   }
@@ -294,6 +297,7 @@ const UpdateUserModel = ({
                   size="small"
                   sx={selectTextfieldStyle}
                 >
+                  <MenuItem value="">None</MenuItem>
                   {designationList.map((item, index) => (
                     <MenuItem key={index} value={item?.designationId}>
                       {item?.designationName}
@@ -317,9 +321,7 @@ const UpdateUserModel = ({
                 <TextField
                   error={validationError && userFormData?.departmentId === ""}
                   helperText={
-                    validationError && userFormData?.departmentId === ""
-                      ? "Select Department"
-                      : ""
+                    userFormData?.departmentId === "" ? "Select Department" : ""
                   }
                   onChange={(e, selectedDepartment) => {
                     setUserFormData({
@@ -333,6 +335,7 @@ const UpdateUserModel = ({
                   size="small"
                   sx={selectTextfieldStyle}
                 >
+                  <MenuItem value="">None</MenuItem>
                   {departmentList.map((item, index) => (
                     <MenuItem key={index} value={item?.departmentId}>
                       {item?.departmentName}
@@ -406,8 +409,24 @@ const UpdateUserModel = ({
                     <TextField
                       {...params}
                       size="small"
+                      error={validationError && userFormData?.roles == ""}
+                      helperText={
+                        userFormData?.roles == ""
+                          ? "Select at least one role"
+                          : ""
+                      }
                       sx={{
                         // height: "30px",
+                        "& .MuiFormHelperText-root": {
+                          margin: 0,
+                          padding: 0,
+                          color:
+                            validationError && userFormData?.roles == ""
+                              ? "#FF0000"
+                              : "#085f99",
+                          fontSize: "11px", // Change the font size
+                          fontWeight: 400,
+                        },
                         "& .MuiOutlinedInput-root": {
                           "& fieldset": {
                             border: "1px solid #085f99", // Removing default border

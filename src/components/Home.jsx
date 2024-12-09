@@ -8,6 +8,7 @@ import {
   Select,
   TextField,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,7 +23,8 @@ import UpdateUserModel from "./UpdateUserModel";
 import ContactModel from "./ContactModel";
 
 const Home = () => {
-  const [age, setAge] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [departmentId, setDepartmentId] = useState(0);
   const [addUserModelOpen, setAddUserModelOpen] = useState(false);
   const [updateUserModelOpen, setUpdateUserModelOpen] = useState(false);
   const [contactModelOpen, setContactModelOpen] = useState(false);
@@ -32,12 +34,12 @@ const Home = () => {
   const [departmentList, setDepartmentList] = useState([]);
   const [rolesList, setRolesList] = useState([]);
   const [contactRowData, setContactRowData] = useState({});
+  const [username, setUsername] = useState("");
+  const [filterBox, setFilterBox] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMDAwNyIsImV4cCI6MTczMzMxNjAwMywiaXNzIjoiQ29tbXVuaWNhdGlvbkh1Yl9NYXhSZW1pbmQiLCJhdWQiOiJDb21tdW5pY2F0aW9uSHViX1VzZXJzIn0.y6AcWdeYU-4GYmMjCoE_-DcTIWqapDVErRVg6joPaTA";
-  const handleChange = (event) => {
-    setAge(event.target.value);
-  };
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIyODAxMTQiLCJleHAiOjE3MzM3NDcwODQsImlzcyI6IkNvbW11bmljYXRpb25IdWJfTWF4UmVtaW5kIiwiYXVkIjoiQ29tbXVuaWNhdGlvbkh1Yl9Vc2VycyJ9.phlTKQm42FW4Jxe_UR5BcS-4GO4OHrjyDzgJPBDfMW8";
   const handleClose = () => {
     setAddUserModelOpen(false);
   };
@@ -80,7 +82,7 @@ const Home = () => {
       field: "isActive",
       headerName: "User Status",
       minWidth: 250,
-      maxWidth: 350,
+      maxWidth: 280,
       renderCell: (params) => {
         return (
           <Box
@@ -184,7 +186,6 @@ const Home = () => {
   ];
 
   const handleEdit = (params) => {
-    console.log(params?.row, "edit button");
     setUpdateUserModelOpen(true);
     setEditRowData(params?.row);
   };
@@ -192,12 +193,12 @@ const Home = () => {
   const handleContactModel = (params) => {
     setContactModelOpen(true);
     setContactRowData(params?.row);
-    console.log(params, "contact list");
   };
 
-  const getAPIUserData = async () => {
+  const getAPIUserData = async (username, status, deptId) => {
+    setLoading(true);
     const resp = await fetch(
-      `http://tfs-dgk:8784/api/User/GetUsers?page=1&pageSize=200`,
+      `http://tfs-dgk:8784/api/User/GetUsers?page=1&pageSize=200&username=${username}&status=${status}&depId=${deptId}`,
       {
         method: "GET",
         headers: {
@@ -208,6 +209,7 @@ const Home = () => {
     );
     const data = await resp?.json();
     setRows(data?.result);
+    setLoading(false);
   };
 
   const getDesignationListData = async () => {
@@ -250,11 +252,11 @@ const Home = () => {
   };
 
   useEffect(() => {
+    getAPIUserData(username, status, departmentId);
     getDesignationListData();
     getDepartmentListData();
     getroleListData();
-    getAPIUserData();
-  }, []);
+  }, [username, status, departmentId]);
 
   return (
     <>
@@ -311,91 +313,97 @@ const Home = () => {
               //   width: "80%",
             }}
           >
-            <TextField
-              sx={{
-                fontWeight: 500,
-                fontSize: "12px",
-                width: "130px",
-                height: "35px", // Adjust the height as needed
-                bgcolor: "#ffffff",
-                color: "#6b7175",
-                "& .MuiInputBase-root": {
-                  height: "100%",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderRadius: "8px",
-                },
-              }}
-              placeholder="Search Name"
-            />
-            {/* Select */}
-            <Box sx={{ minWidth: 100 }}>
-              <FormControl fullWidth>
-                <InputLabel
+            {filterBox && (
+              <Box sx={{ display: filterBox === true ? "flex" : "", gap: 1 }}>
+                <TextField
                   sx={{
-                    display: "flex",
-                    width: "100%",
-                    height: "12px", // Let the height adjust automatically
-                    alignItems: "center", // Centers vertically within the InputLabel
+                    fontWeight: 500,
+                    fontSize: "12px",
+                    width: "130px",
+                    height: "35px", // Adjust the height as needed
+                    bgcolor: "#ffffff",
+                    color: "#6b7175",
+                    "& .MuiInputBase-root": {
+                      height: "100%",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderRadius: "8px",
+                    },
                   }}
-                >
-                  status
-                </InputLabel>
-                <Box
-                  sx={{
-                    bgcolor: "#085f99",
-                    width: "6px",
-                    borderTopLeftRadius: "30px 50px",
-                  }}
-                >
-                  <Select
-                    sx={{ height: 35, width: "100px" }}
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={age}
-                    label="Status"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value={10}>active</MenuItem>
-                    <MenuItem value={20}>inactive</MenuItem>
-                  </Select>
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Search Name"
+                />
+                {/* Select */}
+                <Box sx={{ minWidth: 120 }}>
+                  <FormControl fullWidth>
+                    <InputLabel
+                      sx={{
+                        display: "flex",
+                        width: "100%",
+                        height: "12px", // Let the height adjust automatically
+                        alignItems: "center", // Centers vertically within the InputLabel
+                      }}
+                    >
+                      status
+                    </InputLabel>
+                    <Box
+                      sx={{
+                        bgcolor: "#085f99",
+                        width: "6px",
+                        borderTopLeftRadius: "30px 50px",
+                      }}
+                    >
+                      <Select
+                        sx={{ height: 35, width: "120px" }}
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={status}
+                        label="Status"
+                        onChange={(e) => setStatus(e.target.value)}
+                      >
+                        <MenuItem value={true}>Active</MenuItem>
+                        <MenuItem value={false}>InActive</MenuItem>
+                      </Select>
+                    </Box>
+                  </FormControl>
                 </Box>
-              </FormControl>
-            </Box>
-            <Box sx={{ minWidth: 130 }}>
-              <FormControl fullWidth>
-                <InputLabel
-                  sx={{
-                    display: "flex",
-                    width: "100%",
-                    height: "12px", // Let the height adjust automatically
-                    alignItems: "center", // Centers vertically within the InputLabel
-                  }}
-                >
-                  Department
-                </InputLabel>
-                <Box
-                  sx={{
-                    bgcolor: "#085f99",
-                    width: "6px",
-                    borderTopLeftRadius: "30px 50px",
-                  }}
-                >
-                  <Select
-                    sx={{ height: 35, width: "130px" }}
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={age}
-                    label="Department"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value={10}>It</MenuItem>
-                    <MenuItem value={20}>Billing</MenuItem>
-                  </Select>
+                <Box sx={{ minWidth: 130 }}>
+                  <FormControl fullWidth>
+                    <InputLabel
+                      sx={{
+                        display: "flex",
+                        width: "100%",
+                        height: "12px", // Let the height adjust automatically
+                        alignItems: "center", // Centers vertically within the InputLabel
+                      }}
+                    >
+                      Department
+                    </InputLabel>
+                    <Box
+                      sx={{
+                        bgcolor: "#085f99",
+                        width: "6px",
+                        borderTopLeftRadius: "30px 50px",
+                      }}
+                    >
+                      <Select
+                        sx={{ height: 35, width: "130px" }}
+                        value={departmentId === 0 ? "" : departmentId}
+                        label="Department"
+                        onChange={(e) => setDepartmentId(e.target.value)}
+                      >
+                        {departmentList.map((item, index) => (
+                          <MenuItem key={index} value={item?.departmentId}>
+                            {item?.departmentName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Box>
+                  </FormControl>
                 </Box>
-              </FormControl>
-            </Box>
-
+              </Box>
+            )}
             {[
               { lable: "Filter", icon: <FilterListOutlinedIcon /> },
               { lable: "Export", icon: <CloudDownloadOutlinedIcon /> },
@@ -425,6 +433,8 @@ const Home = () => {
                   onClick={() =>
                     item.lable === "Add New User"
                       ? setAddUserModelOpen(true)
+                      : item.lable === "Filter"
+                      ? setFilterBox(true)
                       : ""
                   }
                 >
@@ -436,81 +446,97 @@ const Home = () => {
         </Box>
 
         {/* DataGrid Box */}
-        <Box sx={{ height: 600, width: "100%" }}>
-          <DataGrid
-            rows={rows}
-            getRowId={(rows) => rows.userId}
-            columns={columns}
-            sx={{
-              overflow: "hidden",
-              bgcolor: "#ffffff",
 
-              "& .MuiDataGrid-row:hover": {
-                backgroundColor: "#ECF6FF",
-              },
-
-              "& .MuiDataGrid-cell:hover": {
-                borderLeft: "1px solid #ffffff",
-                borderRight: "1px solid #ffffff",
-              },
-
-              "& .MuiDataGrid-columnSeparator": {
-                display: "none",
-              },
-
-              "& .MuiDataGrid-footerContainer": {
-                backgroundColor: "#d7e5ef",
-                borderTopLeftRadius: "0px !important",
-                borderTopRightRadius: "0px !important",
-                color: "#085f99",
-                fontWeight: 600,
-
-                "& *": {
-                  fontWeight: 600,
-                  color: "#085f99", // Color applied to all child elements
-                },
-              },
-              "& .MuiDataGrid-columnHeader": {
-                backgroundColor: "#d7e5ef",
-                borderTopLeftRadius: "0px !important",
-                borderTopRightRadius: "0px !important",
-                color: "#085f99",
-                fontSize: {
-                  xl: "15px",
-                  lg: "15px",
-                  md: "15px",
-                  sm: "13px",
-                  xs: "13px",
-                },
-                "& *": {
-                  fontWeight: 600,
-                },
+        <Box sx={{ height: 610, width: "100%" }}>
+          {loading ? (
+            <div
+              style={{
+                width: "100%",
+                height: "20vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CircularProgress />
+            </div>
+          ) : (
+            <DataGrid
+              rows={rows}
+              getRowId={(rows) => rows.userId}
+              columns={columns}
+              columnHeaderHeight={35}
+              sx={{
                 overflow: "hidden",
-                ".MuiSvgIcon-root": {
+                bgcolor: "#ffffff",
+
+                "& .MuiDataGrid-row:hover": {
+                  backgroundColor: "#ECF6FF",
+                },
+
+                "& .MuiDataGrid-cell:hover": {
+                  borderLeft: "1px solid #ffffff",
+                  borderRight: "1px solid #ffffff",
+                },
+
+                "& .MuiDataGrid-columnSeparator": {
+                  display: "none",
+                },
+
+                "& .MuiDataGrid-footerContainer": {
+                  backgroundColor: "#d7e5ef",
+                  borderTopLeftRadius: "0px !important",
+                  borderTopRightRadius: "0px !important",
                   color: "#085f99",
+                  fontWeight: 600,
+
+                  "& *": {
+                    fontWeight: 600,
+                    color: "#085f99", // Color applied to all child elements
+                  },
                 },
-              },
-              "& .MuiDataGrid-cell": {
-                fontSize: "12px !important",
-                color: "#1E1D1F !important",
-                fontWeight: "500 !important",
-                borderTopLeftRadius: "0px !important",
-                borderTopRightRadius: "0px !important",
-                // justifyContent: "center",
-                // textAlign: "center",
-              },
-            }}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 10,
+                "& .MuiDataGrid-columnHeader": {
+                  backgroundColor: "#d7e5ef",
+                  borderTopLeftRadius: "0px !important",
+                  borderTopRightRadius: "0px !important",
+                  color: "#085f99",
+                  fontSize: {
+                    xl: "15px",
+                    lg: "15px",
+                    md: "15px",
+                    sm: "13px",
+                    xs: "13px",
+                  },
+                  "& *": {
+                    fontWeight: 600,
+                  },
+                  overflow: "hidden",
+                  ".MuiSvgIcon-root": {
+                    color: "#085f99",
+                  },
                 },
-              },
-            }}
-            pageSizeOptions={[10, 25, 50, 100]}
-            // checkboxSelection
-            disableRowSelectionOnClick
-          />
+                "& .MuiDataGrid-cell": {
+                  fontSize: "12px !important",
+                  color: "#1E1D1F !important",
+                  fontWeight: "500 !important",
+                  borderTopLeftRadius: "0px !important",
+                  borderTopRightRadius: "0px !important",
+                  // justifyContent: "center",
+                  // textAlign: "center",
+                },
+              }}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 10,
+                  },
+                },
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              // checkboxSelection
+              disableRowSelectionOnClick
+            />
+          )}
         </Box>
       </Box>
 
@@ -519,7 +545,6 @@ const Home = () => {
           getAPIUserData={getAPIUserData}
           addUserModelOpen={addUserModelOpen}
           onClose={handleClose}
-          designationList={designationList}
           departmentList={departmentList}
           rolesList={rolesList}
           token={token}
