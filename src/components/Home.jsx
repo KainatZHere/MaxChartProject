@@ -334,6 +334,34 @@ const Home = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Search Name"
                 />
+                {/* <TextField
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                  }}
+                  value={status}
+                  label="Status"
+                  select
+                  size="small"
+                  sx={{
+                    width: 120,
+                    borderLeft: "10px inset red",
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        // border: "1px solid #085f99", // Removing default border
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#085f99", // Change this to your hover color
+                      },
+                      // Border color on focus
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#085f99", // Change this to your focus color
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value={true}>Active</MenuItem>
+                  <MenuItem value={false}>InActive</MenuItem>
+                </TextField> */}
                 {/* Select */}
                 <Box sx={{ minWidth: 120 }}>
                   <FormControl fullWidth>
