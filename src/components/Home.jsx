@@ -18,9 +18,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
-import AddUserModel from "./AddUserModel";
-import UpdateUserModel from "./UpdateUserModel";
-import ContactModel from "./ContactModel";
+import UpdateUserModel from "./AdminPanel/UpdateUserModel";
+import ContactModel from "./AdminPanel/ContactModel";
+import AddUserModel from "./AdminPanel/AddUserModel";
 
 const Home = () => {
   const [status, setStatus] = React.useState("");

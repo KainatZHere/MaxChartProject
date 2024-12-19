@@ -6,7 +6,7 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import FormControl from "@mui/material/FormControl";
 import Autocomplete from "@mui/material/Autocomplete";
 import MenuItem from "@mui/material/MenuItem";
-import { UserContext } from "../Context/UserConetxt";
+import { UserContext } from "../../Context/UserConetxt";
 
 const UpdateUserModel = ({
   getAPIUserData,

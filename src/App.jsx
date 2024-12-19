@@ -1,42 +1,34 @@
 import "./App.css";
-import Home from "./components/Home";
-import AddUserModel from "./components/AddUserModel";
-import UpdateUserModel from "./components/UpdateUserModel";
-import Contact from "./components/ContactModel";
+import ChatModule from "./components/Chat/ChatModule";
 import AlertProvider from "./Context/AlertProvider";
-import MyTest from "./components/Test";
-import RemoveModel from "./components/RemoveModel";
 import { Notifications } from "react-push-notification";
-
 import { BrowserRouter, Route, Routes } from "react-router";
+import EmailModule from "./components/Email/EmailModule";
+import InboxModule from "./components/Email/Inbox/InboxModule";
+import SendModule from "./components/Email/Send/SendModule";
+import FavouriteModule from "./components/Email/Favourite/FavouriteModule";
+import DraftModule from "./components/Email/Draft/DraftModule";
+import TrashModule from "./components/Email/Trash/TrashModule";
 
 function App() {
   return (
     <>
       {/* <Notifications /> */}
-      {/* <h2
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {" "}
-        Notification Practice Work
-      </h2> */}
-      {/* <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<MyHome />}>
-            <Route path="about" element={<MyAbout />} />
-            <Route path="contact" element={<MyContact />} />
-            <Route path="*" element={<MyError />} />
-          </Route>
-        </Routes>
-      </BrowserRouter> */}
 
-      {/* <AlertProvider>
-        <Home />
-      </AlertProvider> */}
+      <BrowserRouter>
+        <AlertProvider>
+          <Routes>
+            <Route path="/" element={<EmailModule />}>
+              <Route path="Inbox" element={<InboxModule />} />
+              <Route path="Send" element={<SendModule />} />
+              <Route path="Draft" element={<DraftModule />} />
+              <Route path="Favourite" element={<FavouriteModule />} />
+              <Route path="Trash" element={<TrashModule />} />
+              <Route path="*" element={"Error"} />
+            </Route>
+          </Routes>
+        </AlertProvider>
+      </BrowserRouter>
     </>
   );
 }

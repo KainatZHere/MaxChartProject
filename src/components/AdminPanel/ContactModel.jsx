@@ -10,13 +10,13 @@ import {
 } from "@mui/material";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import Avatar from "@mui/material/Avatar";
-import avator1 from "../assets/avator1.png";
-import avator2 from "../assets/avator2.jpg";
+import avator1 from "../../assets/avator1.png";
+import avator2 from "../../assets/avator2.jpg";
 import InputAdornment from "@mui/material/InputAdornment";
 import { Search } from "@mui/icons-material";
 import RemoveModel from "./RemoveModel";
 import BlockModel from "./BlockModel";
-import { UserContext } from "../Context/UserConetxt";
+import { UserContext } from "../../Context/UserConetxt";
 
 const ContactModel = ({ contactModelOpen, onClose, contactRowData, token }) => {
   const { setAlertMessage, setSnackbarOpen } = useContext(UserContext);
